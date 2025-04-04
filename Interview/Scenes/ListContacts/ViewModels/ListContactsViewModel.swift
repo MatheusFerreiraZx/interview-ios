@@ -1,26 +1,30 @@
 import Foundation
 
+protocol ListContactServiceViewModelProtocol: AnyObject {
+    func SuccessLoadContacts(_ contacts: [Contact])
+    func FailedToLoadContacts(with error: ListContactsServiceError)
+}
+
 class ListContactsViewModel {
-    private let service = ListContactService()
+    private let service: ListContactServiceProtocol
     
-    private var completion: (([Contact]?, Error?) -> Void)?
+    weak var delegate: ListContactServiceViewModelProtocol?
     
-    init() { }
-    
-    func loadContacts(_ completion: @escaping ([Contact]?, Error?) -> Void) {
-        self.completion = completion
-        service.fetchContacts { contacts, err in
-            self.handle(contacts, err)
-        }
+    init(service: ListContactServiceProtocol = ListContactService()) {
+        self.service = service
     }
     
-    private func handle(_ contacts: [Contact]?, _ error: Error?) {
-        if let e = error {
-            completion?(nil, e)
-        }
-        
-        if let contacts = contacts {
-            completion?(contacts, nil)
+    func loadContacts() {
+        service.fetchContacts {
+            [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let contacts):
+                    self?.delegate?.SuccessLoadContacts(contacts)
+                case .failure(let error):
+                    self?.delegate?.FailedToLoadContacts(with: error)
+                }
+            }
         }
     }
 }
