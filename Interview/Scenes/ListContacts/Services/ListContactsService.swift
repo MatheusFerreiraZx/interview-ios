@@ -1,6 +1,6 @@
 import Foundation
 
-private let apiURL = "https://669ff1b9b132e2c136ffa741.mockapi.io/picpay/ios/interview/contatos"
+private let apiURL = "https://669ff1b9b132e2c136ffa741.mockapi.io/picpay/ios/interview/contacts"
 
 enum ListContactsServiceError: Error {
     case invalidURL
